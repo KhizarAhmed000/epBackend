@@ -10,6 +10,10 @@ const EngineerSchema = new Schema({
   urlOfLicense: String,
   urlOfPaymentReceipt: String,
   approved: Boolean,
+  email: String,
+  hiredBy: [String],
+  appointments: [String],
+  projects:[String],
 });
 
 const Engineer = mongoose .model("Engineer", EngineerSchema);
