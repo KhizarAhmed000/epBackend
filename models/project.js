@@ -4,8 +4,8 @@ const Schema = mongoose.Schema;
 const ProjectSchema = new Schema({
   engineer: String,
   projectName: String,
-  startDate: Date,
-  endDate: Date,
+  startDate: String,
+  endDate: String,
   value: Number,
   description: String,
   imgArray: Array,

@@ -7,7 +7,7 @@ const AppointmentSchema = new Schema({
   clientName: String,
   projectTimeline: String,
   proposedValue: Number,
-  appointmentDate: Date,
+  appointmentDate: String,
   projectDetails: String,
 });
 

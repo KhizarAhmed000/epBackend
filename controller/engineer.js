@@ -1,5 +1,6 @@
+const Appointment = require('../models/appointment');
 const Engineer = require('../models/Engineer');
-const Project = require('../models/Project');
+const Project = require('../models/project');
 
 // Create a new engineer
 exports.createEngineer = async (req, res, next) => {
@@ -147,6 +148,41 @@ exports.createProject = async (req, res, next) => {
   }
 };
 
+
+exports.createAppointment = async (req, res, next) => {
+  try {
+    const { user, engineerId, clientName, projectTimeline, proposedValue, appointmentDate, projectDetails } = req.body;
+
+    // Create a new appointment
+    const newAppointment = await Appointment.create({
+      user,
+      engineer: engineerId,
+      clientName,
+      projectTimeline,
+      proposedValue,
+      appointmentDate,
+      projectDetails
+    });
+
+    // Find the engineer by ID and update their appointments array
+    const updatedEngineer = await Engineer.findByIdAndUpdate(
+      engineerId,
+      { $push: { appointments: newAppointment._id } },
+      { new: true }
+    );
+
+    if (!updatedEngineer) {
+      return res.status(404).json({ status: 404, message: "Engineer not found" });
+    }
+
+    return res.status(201).json({ message: "Appointment created and assigned to engineer", appointment: newAppointment, engineer: updatedEngineer });
+  } catch (error) {
+    console.error("Error creating appointment and assigning to engineer:", error);
+    return res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
+
+
 exports.getEngineerProjects = async (req, res, next) => {
   try {
     const { email } = req.body;
@@ -215,6 +251,27 @@ exports.removeProject = async (req, res, next) => {
     return res.status(200).json({ message: "Project removed successfully", engineer: updatedEngineer });
   } catch (error) {
     console.error("Error removing project:", error);
+    return res.status(500).json({ message: "Internal server error", error: error.message });
+  }
+};
+
+exports.getAppointmentsByIds = async (req, res, next) => {
+  try {
+    const { appointmentIds } = req.body;
+
+    if (!Array.isArray(appointmentIds) || appointmentIds.length === 0) {
+      return res.status(400).json({ message: "Invalid input: appointmentIds should be a non-empty array." });
+    }
+
+    const appointments = await Appointment.find({ _id: { $in: appointmentIds } });
+
+    if (appointments.length === 0) {
+      return res.status(404).json({ message: "No appointments found for the given IDs." });
+    }
+
+    return res.status(200).json({ message: "Appointments retrieved successfully", appointments });
+  } catch (error) {
+    console.error("Error retrieving appointments:", error);
     return res.status(500).json({ message: "Internal server error", error: error.message });
   }
 };
